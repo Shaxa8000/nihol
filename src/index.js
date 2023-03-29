@@ -1,12 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import Login from './components/Login';
 import Wrapper from './hooks/Wrapper';
 import './index.css';
+import 'antd/dist/reset.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Wrapper>Hello world!</Wrapper>
+    <Wrapper><Login/></Wrapper>
   </React.StrictMode>
 );
 
