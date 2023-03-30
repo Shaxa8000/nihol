@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import {Wrapper} from './style';
-import { notification } from 'antd';
-import axios from 'axios';
+import {useAxios} from '../../hooks/useAxios';
+import { errorNotifier } from '../../Generic/NotificationAPI';
 
 const Login = () => {
+  const axios = useAxios();
   const [warningAnimation, setWarningAnimation] = useState(false);
   const numberRef = useRef();
   const passwordRef = useRef();
@@ -15,33 +16,31 @@ const Login = () => {
     }, 1000);
   }
   
-  const onAuth = () => {
+  const onAuth = async () => {
     const number = numberRef.current.input.value;
     const password = passwordRef.current.input.value;
     if(!password || !number) {
       playAnim();
-      notification.error({
-        message: 'Please fill all fields'
-      })
+      errorNotifier({errorStatus: 'notFillingError'});
     }else {
-      axios({
-        url: `${process.env.REACT_APP_MAIN_URL}/user/sign-in`,
+     const response = await axios({
+        url: `/user/sign-in`,
         method: 'POST',
-        data: {
+        body: {
           password: password,
           phoneNumber: `+998${number}`
         }
-      }).then((res)=>{
-          console.log(res);
       });
       
-      console.log({
-        number: numberRef.current.input.value,
-        password: passwordRef.current.input.value,
-      });
+      if(response?.response?.status >= 400){
+        return errorNotifier({ errorStatus: response?.response?.status });
+      }
+        
+        // setting token on the local storage
+        const {token} = response.data.data;
+        localStorage.setItem("token", token);
     }
-      
-  }
+  };
   
   return (
     <Wrapper>
