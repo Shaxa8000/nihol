@@ -16,6 +16,10 @@ const Login = () => {
     setTimeout(() => {
       setWarningAnimation(false);
     }, 1000);
+  };
+  
+  const onKeyDetect = (e) => {
+    if(e.key === 'Enter' || e.type === 'click') return onAuth();
   }
   
   const onAuth = async () => {
@@ -65,8 +69,12 @@ const Login = () => {
            bordered={false}
            placeholder='Parol...'
            ref={passwordRef}
+           onKeyDown = {onKeyDetect}
         />
-        <Wrapper.Button warningAnimation = {warningAnimation} onClick={onAuth}>
+        <Wrapper.Button
+          warningAnimation = {warningAnimation}
+          onClick={onKeyDetect}
+        >
           {
             loading ? <LoadingOutlined /> : "Login"
           }
