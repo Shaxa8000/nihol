@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import {Wrapper} from './style';
 import {useAxios} from '../../hooks/useAxios';
 import { errorNotifier } from '../../Generic/NotificationAPI';
+import {LoadingOutlined} from '@ant-design/icons';
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
   const axios = useAxios();
   const [warningAnimation, setWarningAnimation] = useState(false);
   const numberRef = useRef();
@@ -17,29 +19,34 @@ const Login = () => {
   }
   
   const onAuth = async () => {
+    if(loading) return; // after one time request it will be blocked
     const number = numberRef.current.input.value;
     const password = passwordRef.current.input.value;
     if(!password || !number) {
       playAnim();
       errorNotifier({errorStatus: 'notFillingError'});
-    }else {
-     const response = await axios({
+      return; // stops the if block, so we don't need else keyword
+    }
+    setLoading(true);  // before the request
+    const response = await axios({
         url: `/user/sign-in`,
         method: 'POST',
         body: {
           password: password,
           phoneNumber: `+998${number}`
         }
-      });
+    });
+    
+    setLoading(false); // after the request
       
-      if(response?.response?.status >= 400){
-        return errorNotifier({ errorStatus: response?.response?.status });
-      }
+    if(response?.response?.status >= 400){
+      return errorNotifier({ errorStatus: response?.response?.status });
+    };
+      
         
-        // setting token on the local storage
-        const {token} = response.data.data;
-        localStorage.setItem("token", token);
-    }
+    // setting token on the local storage
+    const {token} = response.data.data;
+    localStorage.setItem("token", token);
   };
   
   return (
@@ -59,7 +66,11 @@ const Login = () => {
            placeholder='Parol...'
            ref={passwordRef}
         />
-        <Wrapper.Button warningAnimation = {warningAnimation} onClick={onAuth}>Login</Wrapper.Button>
+        <Wrapper.Button warningAnimation = {warningAnimation} onClick={onAuth}>
+          {
+            loading ? <LoadingOutlined /> : "Login"
+          }
+        </Wrapper.Button>
       </Wrapper.Container>
     </Wrapper>
   )
